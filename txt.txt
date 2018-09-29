@@ -1,10 +1,33 @@
 yum -y install java-1.8.0-openjdk-devel
 yum -y install openssh-server openssh-clients
+yum -y install wget
 
 adduser hadoop
 passwd hadoop
+#mkdir -p /home/hadoop/.ssh
+touch /home/hadoop/.ssh/authorized_keys
+chmod 700 /home/hadoop/.ssh/
+chmod 600 /home/hadoop/.ssh/authorized_keys 
+chown hadoop /home/hadoop/ -R
+
+su - hadoop
+
+cd ~
+wget http://www-eu.apache.org/dist/hadoop/common/hadoop-2.6.5/hadoop-2.6.5.tar.gz
+
+
+export HADOOP_HOME=/home/hadoop/hadoop
+export HADOOP_INSTALL=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin
+export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk.x86_64/
 
 chkconfig sshd on
+/etc/init.d/sshd status
 
 https://www.cyberciti.biz/faq/centos-stop-start-restart-sshd-command/
 https://tecadmin.net/setup-hadoop-2-4-single-node-cluster-on-linux/
