@@ -1,0 +1,11 @@
+yum -y install java-1.8.0-openjdk-devel
+yum -y install openssh-server openssh-clients
+
+adduser hadoop
+passwd hadoop
+
+chkconfig sshd on
+
+https://www.cyberciti.biz/faq/centos-stop-start-restart-sshd-command/
+https://tecadmin.net/setup-hadoop-2-4-single-node-cluster-on-linux/
+
