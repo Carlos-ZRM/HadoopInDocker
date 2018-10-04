@@ -10,7 +10,7 @@
 		-p 8088:8088 \
 	        -p 9000:9000 \
 	       	-e HA_USER=hadoop \
-		-e HA_PASS=HadoopInDocker \
+		-e HA_PASS=hadoop \
 		hadoop
 
 docker exec -it HadoopInDocker bash
