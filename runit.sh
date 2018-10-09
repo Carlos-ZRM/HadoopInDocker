@@ -11,7 +11,8 @@
 	        -p 9000:9000 \
 	       	-e HA_USER=hadoop \
 		-e HA_PASS=hadoop \
+		--hostname=master \
 		hadoop
 
-docker exec -it HadoopInDocker bash
+#docker exec -it HadoopInDocker bash
 docker logs HadoopInDocker
