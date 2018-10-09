@@ -1,0 +1,156 @@
+hostnamectl set-hostname master
+
+vi /etc/hosts
+
+add line 192.168.1.41 master.hadoop.lan
+
+curl -LO -H "Cookie: oraclelicense=accept-securebackup-cookie" “http://download.oracle.com/otn-pub/java/jdk/8u92-b14/jdk-8u92-linux-x64.rpm”
+
+rpm -Uvh jdk-8u92-linux-x64.rpm
+
+useradd -d /opt/hadoop hadoop
+
+passwd hadoop
+
+curl -O http://apache.javapipe.com/hadoop/common/hadoop-2.7.2/hadoop-2.7.2.tar.gz 
+
+tar xfz hadoop-2.7.2.tar.gz
+cp -rf hadoop-2.7.2/* /opt/hadoop/
+chown -R hadoop:hadoop /opt/hadoop/
+
+su - hadoop
+vi .bash_profile
+  ## JAVA env variables
+export JAVA_HOME=/usr/java/default
+export PATH=$PATH:$JAVA_HOME/bin
+export CLASSPATH=.:$JAVA_HOME/jre/lib:$JAVA_HOME/lib:$JAVA_HOME/lib/tools.jar
+
+## HADOOP env variables
+export HADOOP_HOME=/opt/hadoop
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_YARN_HOME=$HADOOP_HOME
+export HADOOP_OPTS="-Djava.library.path=$HADOOP_HOME/lib/native"
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin
+
+
+$ source .bash_profile
+$ echo $HADOOP_HOME
+$ echo $JAVA_HOME
+
+$ ssh-keygen -t rsa
+$ ssh-copy-id master.hadoop.lan
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+vi etc/hadoop/core-site.xml
+
+<property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://master.hadoop.lan:9000/</value>
+</property>
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ vi etc/hadoop/hdfs-site.xml
+
+<property>
+    <name>dfs.data.dir</name>
+    <value>file:///opt/volume/datanode</value>
+  </property>
+
+$ vi etc/hadoop/hdfs-site.xml
+  <property>
+    <name>dfs.name.dir</name>
+    <value>file:///opt/volume/namenode</value>
+</property>
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ su root
+# mkdir -p /opt/volume/namenode
+# mkdir -p /opt/volume/datanode
+# chown -R hadoop:hadoop /opt/volume/
+# ls -al /opt/  #Verify permissions
+# exit  #Exit root account to turn back to hadoop user
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+vi etc/hadoop/mapred-site.xml
+
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+  </property>
+</configuration>
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$ vi etc/hadoop/yarn-site.xml
+
+<property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce_shuffle</value>
+</property>
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ $ vi etc/hadoop/hadoop-env.sh
+export JAVA_HOME=/usr/java/default/
+$ vi etc/hadoop/slaves
+
+hdfs namenode -format
+
+$ start-dfs.sh
+$ start-yarn.sh 
+
+ jps
+
+ $ ss -tul
+$ ss -tuln # Numerical output
+
+$ hdfs dfs -mkdir /my_storage
+$ hdfs dfs -put LICENSE.txt /my_storage
+
+$ hdfs dfs -cat /my_storage/LICENSE.txt
+$ hdfs dfs -ls /my_storage/
+
+hdfs dfs -get /my_storage/ ./
+ hdfs dfs -help
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ http://192.168.1.41:50070 
+ http://192.168.1.41:50070/explorer.html
+ http://192.168.1.41:8088 
+http://192.168.1.41:8042 
+
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+$ stop-yarn.sh
+$ stop-dfs.sh
+
+$ su - root
+# vi /etc/rc.local
+
+su - hadoop -c "/opt/hadoop/sbin/start-dfs.sh"
+su - hadoop -c "/opt/hadoop/sbin/start-yarn.sh"
+exit 0
+
+$ chmod +x /etc/rc.d/rc.local
+$ systemctl enable rc-local
+$ systemctl start rc-local
+$ systemctl status rc-local
+
+
+
