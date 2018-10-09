@@ -1,0 +1,1 @@
+https://tecadmin.net/setup-hadoop-2-4-single-node-cluster-on-linux/
